@@ -34,4 +34,20 @@ describe("naming", () => {
 
     expect(inferPaintkitNameFromMetadata(metadata, "Rocket Launcher")).toBe("Team Serviced");
   });
+
+  test("strips extended quality prefixes from market hash", () => {
+    const metadata: CommunityItemMetadata = {
+      assetId: "1",
+      name: "Self-Made Professional Killstreak Team Serviced Rocket Launcher",
+      marketHashName:
+        "Self-Made Professional Killstreak Team Serviced Rocket Launcher (Factory New)",
+      type: null,
+      iconUrl: null,
+      iconUrlLarge: null,
+      tags: [],
+      descriptions: [],
+    };
+
+    expect(inferPaintkitNameFromMetadata(metadata, "Rocket Launcher")).toBe("Team Serviced");
+  });
 });

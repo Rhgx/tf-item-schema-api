@@ -34,6 +34,9 @@ Also used:
 
 - `142` -> `paint.rgbPrimary`
 - `261` -> `paint.rgbSecondary`
+- `142/261` color values are also mapped to:
+  - `paint.primaryName`
+  - `paint.secondaryName`
 - `542` -> `paint.styleOverride`
 - `725` -> `paint.textureWear`
 - `749` -> `paint.textureWearDefault`
@@ -97,6 +100,18 @@ Also used:
 
 - `paintkit_proto_def_index` attribute-name matching -> `cosmetics.paintkitId`
 - `is_festivized` attribute-name matching -> `flags.isFestivized`
+
+## Quality Grade (Community Metadata)
+
+Decorated weapon grade is not parsed from name prefixes. It is parsed from community metadata:
+
+- tags (for example `Rarity`)
+- item `type`
+- description lines
+
+Output field:
+
+- `quality.grade`
 
 ## Attribute Normalization Notes
 

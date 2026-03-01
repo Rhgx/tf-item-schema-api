@@ -49,6 +49,11 @@ const client = createTf2ItemsClient({
 - `includeRaw` (SDK default: `true`)
 - `detailLevel=full|compact` (default: `full`)
 
+Quality metadata:
+
+- `item.quality.name` from community quality tag/schema
+- `item.quality.grade` from community metadata (decorated tiers)
+
 ## Helpers
 
 - `TF2_ATTRIBUTE_DEFINDEX` constant map

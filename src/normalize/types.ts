@@ -102,6 +102,7 @@ export interface ItemIdentity {
 export interface ItemQuality {
   id: number | null;
   name: string | null;
+  grade: string | null;
 }
 
 export interface ItemNames {
@@ -197,6 +198,8 @@ export interface ItemToolData {
 export interface ItemPaintData {
   rgbPrimary: string | null;
   rgbSecondary: string | null;
+  primaryName: string | null;
+  secondaryName: string | null;
   styleOverride: number | null;
   textureWear: number | null;
   textureWearDefault: number | null;

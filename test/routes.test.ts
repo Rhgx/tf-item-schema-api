@@ -20,6 +20,7 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     quality: {
       id: 11,
       name: "Strange",
+      grade: null,
     },
     names: {
       display: "Strange Rocket Launcher",
@@ -94,6 +95,8 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     paint: {
       rgbPrimary: null,
       rgbSecondary: null,
+      primaryName: null,
+      secondaryName: null,
       styleOverride: null,
       textureWear: null,
       textureWearDefault: null,
@@ -170,7 +173,7 @@ function makeService(mode: "ok" | "invalid_key" | "private_inventory" | "vanity_
           }),
           makeItem({
             identity: { itemId: "2", defindex: 200, level: 5 },
-            quality: { id: 5, name: "Unusual" },
+            quality: { id: 5, name: "Unusual", grade: null },
             flags: {
               isStrange: false,
               isUnusual: true,
@@ -195,7 +198,7 @@ function makeService(mode: "ok" | "invalid_key" | "private_inventory" | "vanity_
           }),
           makeItem({
             identity: { itemId: "3", defindex: 5022, level: 1 },
-            quality: { id: 6, name: "Unique" },
+            quality: { id: 6, name: "Unique", grade: null },
             flags: {
               isStrange: false,
               isUnusual: false,

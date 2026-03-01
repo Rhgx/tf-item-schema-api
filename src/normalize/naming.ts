@@ -2,12 +2,18 @@ import type { SchemaCatalog } from "../schema/catalog.js";
 import type { CommunityItemMetadata, NormalizedAttribute, RawInventoryItem } from "./types.js";
 
 const QUALITY_PREFIXES = [
+  "Normal",
+  "Unique",
   "Strange",
   "Unusual",
   "Vintage",
   "Genuine",
   "Haunted",
+  "Community",
+  "Valve",
+  "Self-Made",
   "Collector's",
+  "Collectors",
   "Decorated",
   "Festivized",
   "Festive",
@@ -15,6 +21,19 @@ const QUALITY_PREFIXES = [
 ];
 const KILLSTREAK_PREFIXES = ["Professional Killstreak", "Specialized Killstreak", "Killstreak"];
 const WEAR_SUFFIX_RE = /\s+\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle Scarred)\)$/i;
+const DECORATED_GRADE_NAMES = [
+  "Civilian Grade",
+  "Freelance Grade",
+  "Mercenary Grade",
+  "Commando Grade",
+  "Assassin Grade",
+  "Elite Grade",
+];
+const DECORATED_GRADE_RE = /\b(Civilian|Freelance|Mercenary|Commando|Assassin|Elite)\s+Grade\b/i;
+
+function stripHtml(input: string): string {
+  return input.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
 
 function findNumericAttribute(attributes: NormalizedAttribute[], attributeName: string): number {
   const wanted = attributeName.toLowerCase();
@@ -59,6 +78,45 @@ export function resolveQualityName(
     return null;
   }
   return schema.qualityNameById[qualityId] ?? null;
+}
+
+export function resolveQualityGrade(communityMetadata: CommunityItemMetadata | null): string | null {
+  if (!communityMetadata) {
+    return null;
+  }
+
+  for (const tag of communityMetadata.tags) {
+    const tagName = tag.localizedTagName.trim();
+    const match = DECORATED_GRADE_NAMES.find(
+      (grade) => grade.toLowerCase() === tagName.toLowerCase(),
+    );
+    if (match) {
+      return match;
+    }
+  }
+
+  const textCandidates = [
+    communityMetadata.type ?? "",
+    communityMetadata.name ?? "",
+    communityMetadata.marketHashName ?? "",
+    ...communityMetadata.descriptions.map((line) => stripHtml(line.value)),
+  ];
+
+  for (const text of textCandidates) {
+    const match = text.match(DECORATED_GRADE_RE);
+    if (match?.[0]) {
+      const normalized = match[0].replace(/\s+/g, " ").trim();
+      const known = DECORATED_GRADE_NAMES.find(
+        (grade) => grade.toLowerCase() === normalized.toLowerCase(),
+      );
+      if (known) {
+        return known;
+      }
+      return normalized;
+    }
+  }
+
+  return null;
 }
 
 function cleanPrefixes(value: string): string {

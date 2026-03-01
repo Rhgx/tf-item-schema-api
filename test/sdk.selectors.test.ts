@@ -27,6 +27,7 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     quality: {
       id: 11,
       name: "Strange",
+      grade: null,
     },
     names: {
       display: "Strange Rocket Launcher",
@@ -101,6 +102,8 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     paint: {
       rgbPrimary: null,
       rgbSecondary: null,
+      primaryName: null,
+      secondaryName: null,
       styleOverride: null,
       textureWear: null,
       textureWearDefault: null,

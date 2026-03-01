@@ -8,6 +8,7 @@ import {
   resolveIsFestivized,
   resolveKillstreakTier,
   resolvePaintkitId,
+  resolveQualityGrade,
   resolveQualityName,
   resolveTradable,
   resolveWear,
@@ -421,6 +422,7 @@ function normalizeInventoryItem(
     quality: {
       id: Number.isFinite(qualityId) ? qualityId : null,
       name: qualityName,
+      grade: resolveQualityGrade(communityMetadata),
     },
     names: {
       display: "",

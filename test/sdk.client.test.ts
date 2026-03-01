@@ -18,6 +18,7 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     quality: {
       id: 11,
       name: "Strange",
+      grade: null,
     },
     names: {
       display: "Strange Rocket Launcher",
@@ -92,6 +93,8 @@ function makeItem(overrides: Partial<NormalizedInventoryItem>): NormalizedInvent
     paint: {
       rgbPrimary: null,
       rgbSecondary: null,
+      primaryName: null,
+      secondaryName: null,
       styleOverride: null,
       textureWear: null,
       textureWearDefault: null,
@@ -162,7 +165,7 @@ describe("SDK helpers", () => {
         makeItem({ identity: { itemId: "1", defindex: 205, level: 1 } }),
         makeItem({
           identity: { itemId: "2", defindex: 200, level: 1 },
-          quality: { id: 5, name: "Unusual" },
+          quality: { id: 5, name: "Unusual", grade: null },
           flags: {
             isStrange: true,
             isUnusual: true,
@@ -180,7 +183,7 @@ describe("SDK helpers", () => {
         }),
         makeItem({
           identity: { itemId: "3", defindex: 200, level: 1 },
-          quality: { id: 5, name: "Unusual" },
+          quality: { id: 5, name: "Unusual", grade: null },
           flags: {
             isStrange: true,
             isUnusual: true,
@@ -235,7 +238,7 @@ describe("SDK helpers", () => {
         makeItem({ identity: { itemId: "1", defindex: 205, level: 10 } }),
         makeItem({
           identity: { itemId: "2", defindex: 200, level: 5 },
-          quality: { id: 5, name: "Unusual" },
+          quality: { id: 5, name: "Unusual", grade: null },
           flags: {
             isStrange: false,
             isUnusual: true,

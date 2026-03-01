@@ -117,6 +117,7 @@ describe("InventoryService", () => {
     expect(response.target.steamId).toBe("76561198012345678");
     expect(response.items).toHaveLength(1);
     expect(response.items[0]?.names.display).toBe("Strange Rocket Launcher");
+    expect(response.items[0]?.quality.grade).toBeNull();
     expect(response.items[0]?.classification.kind).toBe("weapon");
     expect(response.items[0]?.flags.isCrate).toBe(false);
     expect(response.items[0]?.flags.isCommunityCrate).toBe(false);
@@ -132,6 +133,8 @@ describe("InventoryService", () => {
     expect(response.items[0]?.crafting.cannotCraft).toBe(false);
     expect(response.items[0]?.tool.targetDefindex).toBeNull();
     expect(response.items[0]?.paint.rgbPrimary).toBeNull();
+    expect(response.items[0]?.paint.primaryName).toBeNull();
+    expect(response.items[0]?.paint.secondaryName).toBeNull();
     expect(response.items[0]?.spells.paint).toBeNull();
     expect(response.items[0]?.strangeRestrictions.entries).toEqual([]);
     expect(response.items[0]?.source.quantity).toBe(1);
@@ -224,6 +227,66 @@ describe("InventoryService", () => {
     expect(response.items[0]?.schema.usedByClasses).toEqual(["Soldier"]);
     expect(response.items[0]?.attributes[0]?.decodedValue).toBe("Fire Horns");
     expect(response.items[0]?.attributes[0]?.lookupTable).toBe("killstreakeffect");
+  });
+
+  test("parses decorated quality grade from community metadata tags/type", async () => {
+    const service = new InventoryService({
+      steamApiClient: {
+        async getPlayerItems() {
+          return {
+            status: 1,
+            numBackpackSlots: 3000,
+            items: [{ id: "1", defindex: 205, quality: 6, attributes: [] }],
+          };
+        },
+        async resolveVanityUrl() {
+          return "76561198012345678";
+        },
+      },
+      schemaCache: {
+        async getCatalog() {
+          return {
+            ...schema,
+            qualityNameById: {
+              ...schema.qualityNameById,
+              6: "Unique",
+            },
+          };
+        },
+      },
+      communityInventoryClient: {
+        async getItemMetadataByAssetId() {
+          return new Map<string, CommunityItemMetadata>([
+            [
+              "1",
+              {
+                assetId: "1",
+                name: "Sand Cannon Rocket Launcher",
+                marketHashName: "Sand Cannon Rocket Launcher (Field-Tested)",
+                type: "Mercenary Grade Rocket Launcher",
+                iconUrl: null,
+                iconUrlLarge: null,
+                tags: [
+                  { category: "Quality", localizedTagName: "Unique", color: null },
+                  { category: "Rarity", localizedTagName: "Mercenary Grade", color: null },
+                ],
+                descriptions: [],
+              },
+            ],
+          ]);
+        },
+      },
+    });
+
+    const response = await service.getInventory({
+      target: "gaben",
+      apiKey: "key",
+      language: "en",
+      apiKeySource: "sdk",
+    });
+
+    expect(response.items[0]?.quality.name).toBe("Unique");
+    expect(response.items[0]?.quality.grade).toBe("Mercenary Grade");
   });
 
   test("parses trade/crafting/tool/paint/spells/strange-restriction metadata", async () => {
@@ -359,6 +422,8 @@ describe("InventoryService", () => {
     expect(item?.tool.unusualifierTemplate).toBe("SomeTemplateName");
     expect(item?.paint.rgbPrimary).toBe("#729E42");
     expect(item?.paint.rgbSecondary).toBe("#2F4F4F");
+    expect(item?.paint.primaryName).toBe("Muskelmannbraun");
+    expect(item?.paint.secondaryName).toBe("An Extraordinary Abundance of Tinge");
     expect(item?.paint.styleOverride).toBe(2);
     expect(item?.spells.paint).toBe("#TF_HalloweenSpell_Paint_1_Attr");
     expect(item?.spells.footsteps).toBe("#TF_HalloweenSpell_Footprints_8421376_Attr");

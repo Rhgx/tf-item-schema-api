@@ -66,3 +66,14 @@ curl "http://localhost:3000/v1/inventory/gaben?includeRaw=true&view=compact" \
 - `429` -> `rate_limited`
 - `502` -> `upstream_http_error`
 - `500` -> `response_parse_error`
+
+## Quality Notes
+
+- `quality.name` comes from community quality tag when available, otherwise schema quality id mapping.
+- `quality.grade` is parsed from community metadata (typically tags/type/description) for decorated tiers such as:
+  - `Civilian Grade`
+  - `Freelance Grade`
+  - `Mercenary Grade`
+  - `Commando Grade`
+  - `Assassin Grade`
+  - `Elite Grade`

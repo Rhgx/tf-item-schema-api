@@ -96,6 +96,8 @@ function isPaintEmpty(item: AnyInventoryItem): boolean {
   return (
     item.paint.rgbPrimary === null &&
     item.paint.rgbSecondary === null &&
+    item.paint.primaryName === null &&
+    item.paint.secondaryName === null &&
     item.paint.styleOverride === null &&
     item.paint.textureWear === null &&
     item.paint.textureWearDefault === null &&
