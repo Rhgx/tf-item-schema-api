@@ -174,13 +174,30 @@ function extractPossibleCollectionAndItems(descriptionLines: string[]): {
       lower.includes("series") ||
       lower.includes("unusual effect") ||
       lower.includes("contains ") ||
-      lower.includes("requires ")
+      lower.includes("requires ") ||
+      lower.includes("contents may")
     ) {
       break;
     }
 
-    // Candidate lines are short title-like entries (item names).
-    if (line.length > 0 && line.length <= 64 && !line.includes(":")) {
+    // Candidate lines are short title-like entries (item names), not metadata lines.
+    const isCollectionLine = lower === collectionLower;
+    const looksLikeMetadata =
+      lower.includes("collection") ||
+      lower.includes("case") ||
+      lower.includes("key to open") ||
+      lower.includes("strange") ||
+      lower.includes("unusual");
+    const hasSentencePunctuation = /[.!?]/.test(line);
+
+    if (
+      line.length > 0 &&
+      line.length <= 64 &&
+      !line.includes(":") &&
+      !isCollectionLine &&
+      !looksLikeMetadata &&
+      !hasSentencePunctuation
+    ) {
       items.push(line);
       continue;
     }

@@ -140,4 +140,37 @@ describe("crate parsing", () => {
     expect(parsed.possibleContentsCollection).toBe("Bone-Chilling Bonanza Collection");
     expect(parsed.possibleContentsItems).toEqual(["Bare Bear Bones", "Demonic Dome", "Power Spike"]);
   });
+
+  test("ignores summary/collection lines when extracting possible contents items", () => {
+    const parsed = resolveCrateData({
+      attributes: [],
+      localizedName: "Summer 2023 Cosmetic Case",
+      communityMetadata: {
+        ...emptyCommunity,
+        name: "Summer 2023 Cosmetic Case",
+        descriptions: [
+          {
+            type: "html",
+            value:
+              "This Case is locked and requires a Summer 2023 Cosmetic Key to open. Contains a community made item from the Summer 2023 Cosmetic Collection.",
+            color: null,
+            label: null,
+          },
+          {
+            type: "html",
+            value: "Contents may be Strange or an Unusual Summer 2023 Hat",
+            color: null,
+            label: null,
+          },
+          { type: "html", value: "Summer 2023 Cosmetic Collection", color: null, label: null },
+          { type: "html", value: "Cranium Cooler", color: null, label: null },
+          { type: "html", value: "The Filamental", color: null, label: null },
+        ],
+        tags: [{ category: "Type", localizedTagName: "Crate", color: null }],
+      },
+    });
+
+    expect(parsed.possibleContentsCollection).toBe("Summer 2023 Cosmetic Collection");
+    expect(parsed.possibleContentsItems).toEqual(["Cranium Cooler", "The Filamental"]);
+  });
 });
