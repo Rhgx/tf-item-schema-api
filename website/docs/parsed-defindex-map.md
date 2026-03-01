@@ -100,6 +100,7 @@ Also used:
 ## Name and Cosmetic Helpers
 
 - `500` -> `names.custom`, `names.display`
+- `143` -> `attributes[].decodedValue` hire date decode (`YYYY-MM-DDTHH:mm:ss`) for `"custom employee number"`
 
 Also used:
 

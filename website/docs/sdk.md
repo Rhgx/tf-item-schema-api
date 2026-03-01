@@ -48,6 +48,11 @@ const client = createTf2ItemsClient({
 
 - `includeRaw` (SDK default: `true`)
 - `detailLevel=full|compact` (default: `full`)
+- Attribute filters:
+  - `attributeDefindex: number[]`
+  - `attributeName: string`
+  - `attributeClass: string`
+  - `attributeDecodedValue: string`
 
 Quality metadata:
 

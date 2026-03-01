@@ -150,6 +150,11 @@ function resolveAttributeLookupValue(args: {
     return special;
   }
 
+  const defindexDecoded = resolveDefindexDecodedValue(args.defindex, roundedValue);
+  if (defindexDecoded) {
+    return { lookupTable, decodedValue: defindexDecoded };
+  }
+
   if (roundedValue === null) {
     return { lookupTable, decodedValue: null };
   }
@@ -159,6 +164,26 @@ function resolveAttributeLookupValue(args: {
   // getting decoded as unrelated spell strings). Only decode when attribute metadata
   // explicitly points to a lookup table or special description-format handlers above.
   return { lookupTable, decodedValue: null };
+}
+
+function resolveDefindexDecodedValue(defindex: number, value: number | null): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (defindex === 143) {
+    const seconds = Number(value);
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+      return null;
+    }
+    const date = new Date(seconds * 1000);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toISOString().slice(0, 19);
+  }
+
+  return null;
 }
 
 function resolveSpecialLookupValue(

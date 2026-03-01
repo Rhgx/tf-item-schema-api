@@ -10,6 +10,10 @@ export interface InventoryFilterOptions {
   qualityId?: number[];
   quality?: string[];
   name?: string;
+  attributeDefindex?: number[];
+  attributeName?: string;
+  attributeClass?: string;
+  attributeDecodedValue?: string;
   isStrange?: boolean;
   isUnusual?: boolean;
   isCrate?: boolean;
@@ -36,6 +40,14 @@ export function filterInventoryItems(
 ): InventoryFilterResult {
   const qualityNames = new Set((filters.quality ?? []).map((name) => name.toLowerCase()));
   const nameFilter = filters.name?.trim().toLowerCase();
+  const attributeNameFilter = filters.attributeName?.trim().toLowerCase();
+  const attributeClassFilter = filters.attributeClass?.trim().toLowerCase();
+  const attributeDecodedValueFilter = filters.attributeDecodedValue?.trim().toLowerCase();
+  const hasAttributeFilters =
+    Boolean(filters.attributeDefindex && filters.attributeDefindex.length > 0) ||
+    Boolean(attributeNameFilter) ||
+    Boolean(attributeClassFilter) ||
+    Boolean(attributeDecodedValueFilter);
 
   const matched = items.filter((item) => {
     if (filters.defindex && !filters.defindex.includes(item.identity.defindex)) {
@@ -61,6 +73,40 @@ export function filterInventoryItems(
         item.names.marketHash ?? "",
       ].map((value) => value.toLowerCase());
       if (!candidates.some((value) => value.includes(nameFilter))) {
+        return false;
+      }
+    }
+    if (hasAttributeFilters) {
+      if (item.attributes.length === 0) {
+        return false;
+      }
+
+      const hasMatchingAttribute = item.attributes.some((attribute) => {
+        if (filters.attributeDefindex && !filters.attributeDefindex.includes(attribute.defindex)) {
+          return false;
+        }
+        if (attributeNameFilter) {
+          const name = attribute.name?.toLowerCase();
+          if (!name || !name.includes(attributeNameFilter)) {
+            return false;
+          }
+        }
+        if (attributeClassFilter) {
+          const attributeClass = attribute.attributeClass?.toLowerCase();
+          if (!attributeClass || !attributeClass.includes(attributeClassFilter)) {
+            return false;
+          }
+        }
+        if (attributeDecodedValueFilter) {
+          const decodedValue = attribute.decodedValue?.toLowerCase();
+          if (!decodedValue || !decodedValue.includes(attributeDecodedValueFilter)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (!hasMatchingAttribute) {
         return false;
       }
     }

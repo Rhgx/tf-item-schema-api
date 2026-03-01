@@ -195,6 +195,19 @@ function makeService(mode: "ok" | "invalid_key" | "private_inventory" | "vanity_
               community: "Unusual Hat",
               marketHash: "Unusual Hat",
             },
+            attributes: [
+              {
+                defindex: 143,
+                name: "custom employee number",
+                attributeClass: "set_employee_number",
+                storedAsInteger: true,
+                lookupTable: null,
+                decodedValue: "2023-03-03T11:18:24",
+                floatValue: 9.580633588094823e21,
+                value: 1677842304,
+                rawValue: 1677842304,
+              },
+            ],
           }),
           makeItem({
             identity: { itemId: "3", defindex: 5022, level: 1 },
@@ -219,6 +232,19 @@ function makeService(mode: "ok" | "invalid_key" | "private_inventory" | "vanity_
               community: "Mann Co. Supply Crate",
               marketHash: "Mann Co. Supply Crate",
             },
+            attributes: [
+              {
+                defindex: 153,
+                name: "cannot trade",
+                attributeClass: "cannot_trade",
+                storedAsInteger: false,
+                lookupTable: null,
+                decodedValue: null,
+                floatValue: 1,
+                value: 1,
+                rawValue: 1065353216,
+              },
+            ],
           }),
         ],
         raw: {
@@ -324,6 +350,22 @@ describe("HTTP routes", () => {
     expect(body.inventory.totalItems).toBe(1);
     expect(body.items[0]?.identity?.itemId).toBe("3");
     expect(body.items[0]?.crate?.series).toBe(30);
+    await app.close();
+  });
+
+  test("filters by assigned attributes", async () => {
+    const app = await createApp({ service: makeService("ok") });
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/inventory/gaben?attributeDefindex=143&attributeClass=employee&attributeDecodedValue=2023-03-03",
+      headers: { "x-steam-api-key": "key" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.inventory.totalItems).toBe(1);
+    expect(body.items[0]?.identity?.itemId).toBe("2");
+    expect(body.items[0]?.attributes?.[0]?.defindex).toBe(143);
     await app.close();
   });
 

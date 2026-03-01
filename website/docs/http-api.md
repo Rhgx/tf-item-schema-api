@@ -27,6 +27,10 @@ Headers:
 - `qualityId=5,11`
 - `quality=Unusual,Strange`
 - `name=rocket`
+- `attributeDefindex=143,153`
+- `attributeName=custom employee number`
+- `attributeClass=set_employee_number`
+- `attributeDecodedValue=2023-03-03T11:18:24`
 - `isStrange=true|false`
 - `isUnusual=true|false`
 - `isCrate=true|false`
@@ -50,6 +54,11 @@ curl "http://localhost:3000/v1/inventory/gaben?language=en" \
 
 ```bash
 curl "http://localhost:3000/v1/inventory/gaben?isUnusual=true&quality=Unusual&defindex=200,205&limit=50&offset=0" \
+  -H "x-steam-api-key: YOUR_KEY"
+```
+
+```bash
+curl "http://localhost:3000/v1/inventory/gaben?attributeDefindex=143&attributeClass=employee&attributeDecodedValue=2023-03-03" \
   -H "x-steam-api-key: YOUR_KEY"
 ```
 

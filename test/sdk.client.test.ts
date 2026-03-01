@@ -248,6 +248,19 @@ describe("SDK helpers", () => {
             isCraftable: true,
             isTradable: true,
           },
+          attributes: [
+            {
+              defindex: 143,
+              name: "custom employee number",
+              attributeClass: "set_employee_number",
+              storedAsInteger: true,
+              lookupTable: null,
+              decodedValue: "2023-03-03T11:18:24",
+              floatValue: 9.580633588094823e21,
+              value: 1677842304,
+              rawValue: 1677842304,
+            },
+          ],
         }),
         makeItem({
           identity: { itemId: "3", defindex: 5022, level: 1 },
@@ -280,6 +293,76 @@ describe("SDK helpers", () => {
     expect(filtered.items[0]?.identity.itemId).toBe("3");
     expect("raw" in filtered).toBe(false);
     expect("rawItem" in filtered.items[0]!).toBe(false);
+  });
+
+  test("filterInventoryResponse supports attribute filters", () => {
+    const response: InventoryResponse = {
+      request: {
+        language: "en",
+        apiKeySource: "sdk",
+        communityMetadataLoaded: true,
+        warnings: [],
+      },
+      target: {
+        input: "76561198012345678",
+        steamId: "76561198012345678",
+        resolvedFrom: "steamid64",
+      },
+      inventory: {
+        totalItems: 2,
+        public: true,
+        fetchedAt: Date.now(),
+      },
+      items: [
+        makeItem({
+          identity: { itemId: "1", defindex: 205, level: 10 },
+          attributes: [
+            {
+              defindex: 153,
+              name: "cannot trade",
+              attributeClass: "cannot_trade",
+              storedAsInteger: false,
+              lookupTable: null,
+              decodedValue: null,
+              floatValue: 1,
+              value: 1,
+              rawValue: 1065353216,
+            },
+          ],
+        }),
+        makeItem({
+          identity: { itemId: "2", defindex: 200, level: 5 },
+          attributes: [
+            {
+              defindex: 143,
+              name: "custom employee number",
+              attributeClass: "set_employee_number",
+              storedAsInteger: true,
+              lookupTable: null,
+              decodedValue: "2023-03-03T11:18:24",
+              floatValue: 9.580633588094823e21,
+              value: 1677842304,
+              rawValue: 1677842304,
+            },
+          ],
+        }),
+      ],
+      raw: {
+        playerItemsResult: { status: 1, numBackpackSlots: 3000, items: [] },
+        schemaFetchedAt: Date.now(),
+      },
+    };
+
+    const filtered = filterInventoryResponse(response, {
+      attributeDefindex: [143],
+      attributeClass: "employee",
+      attributeDecodedValue: "2023-03-03",
+      includeRaw: false,
+    });
+
+    expect(filtered.inventory.totalItems).toBe(1);
+    expect(filtered.items).toHaveLength(1);
+    expect(filtered.items[0]?.identity.itemId).toBe("2");
   });
 
   test("filterInventoryResponse supports compact detail level", () => {
