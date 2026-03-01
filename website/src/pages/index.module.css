@@ -1,5 +1,5 @@
 .heroBanner {
-  background: linear-gradient(120deg, #5a332a 0%, #774e3b 48%, #9a3a21 100%);
+  background: #6a3b30;
   color: #f7e5d7;
   min-height: calc(100vh - var(--ifm-navbar-height));
   padding: 2rem 0;
@@ -12,7 +12,7 @@
 }
 
 [data-theme="light"] .heroBanner {
-  background: linear-gradient(120deg, #f4dfcf 0%, #ebc5a7 52%, #e6ad7f 100%);
+  background: #ebc5a7;
   color: #4f2f26;
 }
 

@@ -105,4 +105,25 @@ describe("unusual parsing", () => {
       unusualSource: null,
     });
   });
+
+  test("does not mark cases as unusual from community effect description lines", () => {
+    const data = resolveUnusualData(
+      [],
+      schema,
+      {
+        ...emptyCommunity,
+        name: "Summer 2023 Cosmetic Case",
+        type: "Summer 2023 Cosmetic Case",
+        tags: [{ category: "Type", localizedTagName: "Crate", color: null }],
+        descriptions: [{ type: "html", value: "Unusual Effect: Chromatic Blaze", color: null, label: null }],
+      },
+    );
+
+    expect(data).toEqual({
+      isUnusual: false,
+      unusualEffectId: null,
+      unusualEffectName: null,
+      unusualSource: null,
+    });
+  });
 });
