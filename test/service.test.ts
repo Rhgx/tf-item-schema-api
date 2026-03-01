@@ -229,6 +229,65 @@ describe("InventoryService", () => {
     expect(response.items[0]?.attributes[0]?.lookupTable).toBe("killstreakeffect");
   });
 
+  test("decodes custom employee number attribute (defindex 143) as hire date-time", async () => {
+    const service = new InventoryService({
+      steamApiClient: {
+        async getPlayerItems() {
+          return {
+            status: 1,
+            numBackpackSlots: 3000,
+            items: [
+              {
+                id: "1",
+                defindex: 205,
+                quality: 11,
+                attributes: [{ defindex: 143, value: 1677842304, float_value: 9.580633588094823e21 }],
+              },
+            ],
+          };
+        },
+        async resolveVanityUrl() {
+          return "76561198012345678";
+        },
+      },
+      schemaCache: {
+        async getCatalog() {
+          return {
+            ...schema,
+            attributeByDefindex: {
+              143: {
+                defindex: 143,
+                name: "custom employee number",
+                attributeClass: null,
+                storedAsInteger: true,
+                lookupTable: null,
+                descriptionFormat: null,
+              },
+            },
+            attributeNameByDefindex: {
+              143: "custom employee number",
+            },
+          };
+        },
+      },
+      communityInventoryClient: {
+        async getItemMetadataByAssetId() {
+          return communityByAsset;
+        },
+      },
+    });
+
+    const response = await service.getInventory({
+      target: "gaben",
+      apiKey: "key",
+      language: "en",
+      apiKeySource: "sdk",
+    });
+
+    const attribute = response.items[0]?.attributes.find((entry) => entry.defindex === 143);
+    expect(attribute?.decodedValue).toBe("2023-03-03T11:18:24");
+  });
+
   test("parses decorated quality grade from community metadata tags/type", async () => {
     const service = new InventoryService({
       steamApiClient: {
