@@ -42,16 +42,12 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'dark',
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'TF Item Schema API',
-      logo: {
-        alt: 'TF Item Schema API Logo',
-        src: 'img/logo.svg',
-      },
       items: [
         {
           type: 'docSidebar',
@@ -67,10 +63,10 @@ const config: Config = {
       ],
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [
         {
-          title: 'Docs',
+          title: 'Learn',
           items: [
             {
               label: 'Overview',
@@ -88,7 +84,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} TF Item Schema API. Built with Docusaurus.`,
+      copyright: `Copyright (c) ${new Date().getFullYear()} TF Item Schema API.`,
     },
     prism: {
       theme: prismThemes.github,

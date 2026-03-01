@@ -1,41 +1,37 @@
 # Website
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+This folder contains the documentation website for `tf-item-schema-api`.
 
-## Installation
+The site is built with [Docusaurus](https://docusaurus.io/).
+
+## Install Dependencies
 
 ```bash
-yarn
+npm install
 ```
 
 ## Local Development
 
 ```bash
-yarn start
+npm start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Most changes appear instantly without restarting the server.
 
 ## Build
 
 ```bash
-yarn build
+npm run build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+This generates static files into `build/`.
 
-## Deployment
-
-Using SSH:
+## Preview Build
 
 ```bash
-USE_SSH=true yarn deploy
+npm run serve
 ```
 
-Not using SSH:
+## Deploy
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+Docs are deployed by GitHub Actions from `.github/workflows/docs-pages.yml`.

@@ -4,34 +4,28 @@ sidebar_position: 4
 
 # SDK
 
-## Imports
+## Install
 
-```ts
-import {
-  createTf2ItemsClient,
-  buildInventorySummary,
-  filterInventoryResponse,
-  TF2_ATTRIBUTE_DEFINDEX,
-  getCrateMetadata,
-  getKillstreakMetadata,
-  getUnusualMetadata,
-  getActiveSpells,
-  isTradableItem,
-  isCraftableItem,
-  getPrimaryImageUrl,
-} from "tf-item-schema-api";
+```bash
+npm install tf-item-schema-api
 ```
 
-## Create Client
+## Quick Start
 
 ```ts
+import { createTf2ItemsClient } from "tf-item-schema-api";
+
 const client = createTf2ItemsClient({
   apiKey: process.env.STEAM_API_KEY,
   language: "en",
 });
+
+const inventory = await client.getInventory("gaben", {
+  includeRaw: false,
+});
 ```
 
-## Methods
+## Main Methods
 
 - `getInventory(target, options?)`
 - `getInventorySummary(target, options?)`
@@ -44,24 +38,31 @@ const client = createTf2ItemsClient({
 - `getSchemaUrl(options?)`
 - `filterInventoryResponse(response, options?)`
 
-`getInventory` supports HTTP-equivalent filters plus:
+## `getInventory` Filter Options
 
-- `includeRaw` (SDK default: `true`)
-- `detailLevel=full|compact` (default: `full`)
-- Attribute filters:
-  - `attributeDefindex: number[]`
-  - `attributeName: string`
-  - `attributeClass: string`
-  - `attributeDecodedValue: string`
+`getInventory` supports all HTTP-style filters and SDK-specific options.
 
-Quality metadata:
+Common options:
 
-- `item.quality.name` from community quality tag/schema
-- `item.quality.grade` from community metadata (decorated tiers)
+- `defindex: number[]`
+- `qualityId: number[]`
+- `quality: string[]`
+- `name: string`
+- `isStrange`, `isUnusual`, `isCrate`, `isCraftable`, `isTradable`
+- `crateSeries: number[]`
+- `hasPaintkit: boolean`
+- `minLevel`, `maxLevel`
+- `limit`, `offset`
+- `attributeDefindex: number[]`
+- `attributeName: string`
+- `attributeClass: string`
+- `attributeDecodedValue: string`
+- `includeRaw` (default: `true` in SDK)
+- `detailLevel: "full" | "compact"` (default: `"full"`)
 
-## Helpers
+## Useful Helpers
 
-- `TF2_ATTRIBUTE_DEFINDEX` constant map
+- `TF2_ATTRIBUTE_DEFINDEX` constant lookup map
 - `getCrateMetadata(item)`
 - `getKillstreakMetadata(item)`
 - `getUnusualMetadata(item)`
@@ -70,23 +71,29 @@ Quality metadata:
 - `isCraftableItem(item)`
 - `getPrimaryImageUrl(item)`
 
-## Example
+## Practical Example
 
 ```ts
+import {
+  createTf2ItemsClient,
+  getUnusualMetadata,
+  getKillstreakMetadata,
+  buildInventorySummary,
+} from "tf-item-schema-api";
+
+const client = createTf2ItemsClient({ apiKey: process.env.STEAM_API_KEY });
+
 const inventory = await client.getInventory("gaben", {
-  isUnusual: true,
+  attributeDefindex: [143],
+  attributeClass: "employee",
+  attributeDecodedValue: "2023-03-03",
   includeRaw: false,
-  detailLevel: "compact",
 });
 
 for (const item of inventory.items) {
-  const crate = getCrateMetadata(item);
   const killstreak = getKillstreakMetadata(item);
   const unusual = getUnusualMetadata(item);
-  const spells = getActiveSpells(item);
-  const tradable = isTradableItem(item);
-  const craftable = isCraftableItem(item);
-  const image = getPrimaryImageUrl(item);
+  console.log(item.names.display, { killstreak, unusual });
 }
 
 const summary = buildInventorySummary(
@@ -97,5 +104,7 @@ const summary = buildInventorySummary(
 ## Defindex Constant Example
 
 ```ts
+import { TF2_ATTRIBUTE_DEFINDEX } from "tf-item-schema-api";
+
 console.log(TF2_ATTRIBUTE_DEFINDEX.trade.cannotTrade); // 153
 ```

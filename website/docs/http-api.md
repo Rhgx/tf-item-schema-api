@@ -8,29 +8,30 @@ sidebar_position: 3
 
 `GET /v1/inventory/:target?language=en`
 
+`target` supports:
+
+- SteamID64: `76561198012345678`
+- Vanity: `gaben`
+- Profile URL: `https://steamcommunity.com/id/gaben/`
+
 Headers:
 
-- `x-steam-api-key` optional. If not present, server uses `STEAM_API_KEY`.
+- `x-steam-api-key` (optional). If omitted, server uses `STEAM_API_KEY`.
 
-`:target` can be:
+## Query Parameters
 
-- SteamID64 (`76561198012345678`)
-- Vanity (`gaben`)
-- Profile URL (`https://steamcommunity.com/id/gaben/`)
-
-## Query Params
+### Basic output options
 
 - `language=en`
 - `view=full|compact` (default: `full`)
 - `includeRaw=true|false` (default: `false`)
+
+### Item-level filters
+
 - `defindex=200,205`
 - `qualityId=5,11`
 - `quality=Unusual,Strange`
 - `name=rocket`
-- `attributeDefindex=143,153`
-- `attributeName=custom employee number`
-- `attributeClass=set_employee_number`
-- `attributeDecodedValue=2023-03-03T11:18:24`
 - `isStrange=true|false`
 - `isUnusual=true|false`
 - `isCrate=true|false`
@@ -42,10 +43,22 @@ Headers:
 - `hasPaintkit=true|false`
 - `minLevel=1`
 - `maxLevel=100`
+
+### Attribute-level filters
+
+- `attributeDefindex=143,153`
+- `attributeName=custom employee number`
+- `attributeClass=set_employee_number`
+- `attributeDecodedValue=2023-03-03`
+
+Attribute filters are matched against an item's `attributes[]` entries.
+
+### Pagination
+
 - `limit=1..5000`
 - `offset=0..n`
 
-## Examples
+## Example Requests
 
 ```bash
 curl "http://localhost:3000/v1/inventory/gaben?language=en" \
@@ -67,6 +80,14 @@ curl "http://localhost:3000/v1/inventory/gaben?includeRaw=true&view=compact" \
   -H "x-steam-api-key: YOUR_KEY"
 ```
 
+## Response Structure (high level)
+
+- `request`: request metadata and warnings
+- `target`: resolved steam target info
+- `inventory`: `totalItems`, `public`, `fetchedAt`
+- `items[]`: normalized items
+- `raw`: only present when `includeRaw=true`
+
 ## Error Mapping
 
 - `401` -> `invalid_key`
@@ -78,8 +99,8 @@ curl "http://localhost:3000/v1/inventory/gaben?includeRaw=true&view=compact" \
 
 ## Quality Notes
 
-- `quality.name` comes from community quality tag when available, otherwise schema quality id mapping.
-- `quality.grade` is parsed from community metadata (typically tags/type/description) for decorated tiers such as:
+- `quality.name` comes from community tags when available, otherwise schema fallback.
+- `quality.grade` is parsed from community metadata (tags/type/descriptions), for example:
   - `Civilian Grade`
   - `Freelance Grade`
   - `Mercenary Grade`
