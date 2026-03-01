@@ -6,6 +6,7 @@ const sidebars: SidebarsConfig = {
     'getting-started',
     'http-api',
     'sdk',
+    'common-recipes',
     'parsed-defindex-map',
     'deployment',
   ],

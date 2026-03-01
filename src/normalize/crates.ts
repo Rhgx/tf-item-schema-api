@@ -4,6 +4,9 @@ const CRATE_SERIES_DEFINDEXES = new Set([187]);
 const SUPPLY_CRATE_HINTS = ["mann co. supply crate", "salvaged mann co. supply crate"];
 const CRATE_WORD_RE = /\b(crate|case)\b/i;
 const SERIES_RE = /series\s*#?\s*(\d+)/i;
+const COLLECTION_RE = /\b(.+?\bcollection)\b/i;
+const POSSIBLE_UNUSUAL_RE = /unusual effect:\s*(.+)$/i;
+const POSSIBLE_UNUSUAL_WITH_RE = /\bmay be unusual with (?:an?\s+)?(.+?)\s+effect\b/i;
 
 function stripHtml(input: string): string {
   return input.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -94,6 +97,103 @@ function looksLikeSupplyCrate(value: string): boolean {
   return SUPPLY_CRATE_HINTS.some((hint) => lower.includes(hint));
 }
 
+function readDescriptionLines(metadata: CommunityItemMetadata | null): string[] {
+  if (!metadata) {
+    return [];
+  }
+  return metadata.descriptions.map((line) => stripHtml(line.value)).filter((line) => line.length > 0);
+}
+
+function extractPossibleUnusualHints(descriptionLines: string[]): string[] {
+  const hints = new Set<string>();
+
+  for (const line of descriptionLines) {
+    const direct = line.match(POSSIBLE_UNUSUAL_RE)?.[1]?.trim();
+    if (direct) {
+      hints.add(direct);
+    }
+
+    const mayBe = line.match(POSSIBLE_UNUSUAL_WITH_RE)?.[1]?.trim();
+    if (mayBe) {
+      hints.add(mayBe);
+    }
+  }
+
+  return [...hints];
+}
+
+function extractPossibleCollectionAndItems(descriptionLines: string[]): {
+  possibleContentsCollection: string | null;
+  possibleContentsItems: string[];
+} {
+  let collection: string | null = null;
+  let collectionLineIndex = -1;
+
+  for (let index = 0; index < descriptionLines.length; index += 1) {
+    const line = descriptionLines[index]!;
+    const fromLine = line.match(/from the (.+?\bcollection)\b/i)?.[1]?.trim();
+    if (fromLine) {
+      collection = fromLine;
+      collectionLineIndex = index;
+      break;
+    }
+  }
+
+  if (!collection) {
+    for (let index = 0; index < descriptionLines.length; index += 1) {
+      const line = descriptionLines[index]!;
+      if (COLLECTION_RE.test(line) && !/contains .* collection/i.test(line)) {
+        collection = line.match(COLLECTION_RE)?.[1]?.trim() ?? line.trim();
+        collectionLineIndex = index;
+        break;
+      }
+    }
+  }
+
+  if (!collection || collectionLineIndex < 0) {
+    return { possibleContentsCollection: null, possibleContentsItems: [] };
+  }
+
+  // If collection was extracted from a sentence ("from the X Collection"),
+  // prefer a standalone collection heading line when present.
+  const collectionLower = collection.toLowerCase();
+  for (let index = collectionLineIndex + 1; index < descriptionLines.length; index += 1) {
+    if (descriptionLines[index]!.toLowerCase() === collectionLower) {
+      collectionLineIndex = index;
+      break;
+    }
+  }
+
+  const items: string[] = [];
+  for (let index = collectionLineIndex + 1; index < descriptionLines.length; index += 1) {
+    const line = descriptionLines[index]!;
+    const lower = line.toLowerCase();
+
+    // Stop scanning once we hit another sentence-like metadata block.
+    if (
+      lower.includes("series") ||
+      lower.includes("unusual effect") ||
+      lower.includes("contains ") ||
+      lower.includes("requires ")
+    ) {
+      break;
+    }
+
+    // Candidate lines are short title-like entries (item names).
+    if (line.length > 0 && line.length <= 64 && !line.includes(":")) {
+      items.push(line);
+      continue;
+    }
+
+    break;
+  }
+
+  return {
+    possibleContentsCollection: collection,
+    possibleContentsItems: [...new Set(items)],
+  };
+}
+
 export function resolveCrateData(input: {
   attributes: NormalizedAttribute[];
   localizedName: string;
@@ -103,9 +203,15 @@ export function resolveCrateData(input: {
   isCommunityCrate: boolean;
   crateSeries: number | null;
   crateType: string | null;
+  possibleUnusualHints: string[];
+  possibleContentsCollection: string | null;
+  possibleContentsItems: string[];
 } {
   const crateSeries = resolveCrateSeries(input.attributes, input.communityMetadata);
   const crateType = resolveCrateType(input.localizedName, input.communityMetadata);
+  const descriptionLines = readDescriptionLines(input.communityMetadata);
+  const possibleUnusualHints = extractPossibleUnusualHints(descriptionLines);
+  const { possibleContentsCollection, possibleContentsItems } = extractPossibleCollectionAndItems(descriptionLines);
 
   const combinedText = [
     input.localizedName,
@@ -126,5 +232,8 @@ export function resolveCrateData(input: {
     isCommunityCrate,
     crateSeries,
     crateType,
+    possibleUnusualHints,
+    possibleContentsCollection,
+    possibleContentsItems,
   };
 }

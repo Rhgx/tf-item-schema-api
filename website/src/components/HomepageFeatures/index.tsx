@@ -5,52 +5,55 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  icon: string;
   description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Inventory Metadata API',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Consistent Item Model',
+    icon: 'API',
     description: (
       <>
-        Resolve Steam profiles and return normalized TF2 item metadata with
-        Strange, Unusual, Killstreak, Crate, and schema-enriched fields.
+        Get a stable response shape across all items, including quality,
+        tradability, unusual effects, killstreak data, spells, crate metadata,
+        and schema-backed attributes.
       </>
     ),
   },
   {
-    title: 'TypeScript SDK',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Powerful Filtering',
+    icon: 'FLT',
     description: (
       <>
-        Use typed SDK methods, filtering, summary utilities, selector helpers,
-        and stable defindex constants to integrate with inventories quickly.
+        Filter by quality, names, trade flags, crate series, and now by
+        assigned item attributes like defindex, class, and decoded value.
       </>
     ),
   },
   {
-    title: 'Structured Docs',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Docs for Real Users',
+    icon: 'DOC',
     description: (
       <>
-        API behavior, SDK usage, parsed defindex mappings, and deployment are
-        documented in a dedicated docs site on GitHub Pages.
+        Follow step-by-step setup, practical API and SDK examples, and clear
+        explanations of each filter and output field without boilerplate fluff.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, icon, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
+      <div className={styles.featureCard}>
+        <div className={styles.iconBadge} aria-hidden>
+          {icon}
+        </div>
+        <div className="text--left">
+          <Heading as="h3">{title}</Heading>
+          <p>{description}</p>
+        </div>
       </div>
     </div>
   );

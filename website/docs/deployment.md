@@ -4,26 +4,31 @@ sidebar_position: 6
 
 # Deployment (GitHub Pages)
 
-This repository deploys docs from `website/` to GitHub Pages using GitHub Actions.
+This project deploys docs from `website/` to GitHub Pages using GitHub Actions.
 
-## GitHub Settings
+## 1) Configure GitHub Pages
 
 In your repository settings:
 
 1. Go to `Settings -> Pages`.
 2. Under Build and deployment, select `GitHub Actions`.
 
-No manual branch publishing step is needed once the workflow is active.
+No manual `gh-pages` branch publishing is required.
 
-## Workflow
+## 2) Workflow File
 
-The workflow file is:
+Deployment workflow:
 
 - `.github/workflows/docs-pages.yml`
 
-It runs on pushes to `main`, builds Docusaurus in `website/`, uploads the static output, and deploys to Pages.
+On pushes to `main`, it:
 
-## Local Build Check
+1. Installs dependencies
+2. Builds the docs site from `website/`
+3. Uploads the build output
+4. Deploys to GitHub Pages
+
+## 3) Verify Locally Before Pushing
 
 ```bash
 cd website
@@ -31,6 +36,6 @@ npm run build
 npm run serve
 ```
 
-## Expected URL
+## 4) Expected URL
 
 - `https://rhgx.github.io/tf-item-schema-api/`
