@@ -503,6 +503,9 @@ function normalizeInventoryItem(
     crate: {
       series: crateData.crateSeries,
       type: crateData.crateType,
+      possibleUnusualHints: crateData.possibleUnusualHints,
+      possibleContentsCollection: crateData.possibleContentsCollection,
+      possibleContentsItems: crateData.possibleContentsItems,
     },
     killstreak,
     cosmetics: {

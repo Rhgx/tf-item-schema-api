@@ -149,6 +149,9 @@ export interface ItemUnusualData {
 export interface ItemCrateData {
   series: number | null;
   type: string | null;
+  possibleUnusualHints?: string[];
+  possibleContentsCollection?: string | null;
+  possibleContentsItems?: string[];
 }
 
 export interface ItemKillstreakData {

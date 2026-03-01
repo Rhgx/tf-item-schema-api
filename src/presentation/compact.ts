@@ -24,7 +24,13 @@ function isUnusualEmpty(item: AnyInventoryItem): boolean {
 }
 
 function isCrateEmpty(item: AnyInventoryItem): boolean {
-  return item.crate.series === null && item.crate.type === null;
+  return (
+    item.crate.series === null &&
+    item.crate.type === null &&
+    (item.crate.possibleUnusualHints?.length ?? 0) === 0 &&
+    item.crate.possibleContentsCollection == null &&
+    (item.crate.possibleContentsItems?.length ?? 0) === 0
+  );
 }
 
 function isKillstreakEmpty(item: AnyInventoryItem): boolean {

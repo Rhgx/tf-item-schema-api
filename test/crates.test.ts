@@ -39,6 +39,9 @@ describe("crate parsing", () => {
     expect(parsed.isCommunityCrate).toBe(false);
     expect(parsed.crateSeries).toBe(50);
     expect(parsed.crateType).toBe("Mann Co. Supply Crate");
+    expect(parsed.possibleUnusualHints).toEqual([]);
+    expect(parsed.possibleContentsCollection).toBeNull();
+    expect(parsed.possibleContentsItems).toEqual([]);
   });
 
   test("parses community crate from case type and description series", () => {
@@ -57,6 +60,9 @@ describe("crate parsing", () => {
     expect(parsed.isCommunityCrate).toBe(true);
     expect(parsed.crateSeries).toBe(124);
     expect(parsed.crateType).toBe("Cosmetic Case");
+    expect(parsed.possibleUnusualHints).toEqual([]);
+    expect(parsed.possibleContentsCollection).toBeNull();
+    expect(parsed.possibleContentsItems).toEqual([]);
   });
 
   test("does not mark regular weapon as crate", () => {
@@ -71,6 +77,9 @@ describe("crate parsing", () => {
       isCommunityCrate: false,
       crateSeries: null,
       crateType: null,
+      possibleUnusualHints: [],
+      possibleContentsCollection: null,
+      possibleContentsItems: [],
     });
   });
 
@@ -95,5 +104,40 @@ describe("crate parsing", () => {
 
     expect(parsed.crateSeries).toBeNull();
     expect(parsed.isCrate).toBe(false);
+  });
+
+  test("extracts possible unusual hints and collection items from case descriptions", () => {
+    const parsed = resolveCrateData({
+      attributes: [],
+      localizedName: "Bone-Chilling Bonanza Case",
+      communityMetadata: {
+        ...emptyCommunity,
+        name: "Bone-Chilling Bonanza Case",
+        descriptions: [
+          {
+            type: "html",
+            value:
+              "This Case is locked and requires a Bone-Chilling Bonanza Key to open. Contains a community made item from the Bone-Chilling Bonanza Collection.",
+            color: null,
+            label: null,
+          },
+          {
+            type: "html",
+            value: "Contents may be Strange and hats may be Unusual with a Halloween 2023 effect",
+            color: null,
+            label: null,
+          },
+          { type: "html", value: "Bone-Chilling Bonanza Collection", color: null, label: null },
+          { type: "html", value: "Bare Bear Bones", color: null, label: null },
+          { type: "html", value: "Demonic Dome", color: null, label: null },
+          { type: "html", value: "Power Spike", color: null, label: null },
+        ],
+        tags: [{ category: "Type", localizedTagName: "Crate", color: null }],
+      },
+    });
+
+    expect(parsed.possibleUnusualHints).toContain("Halloween 2023");
+    expect(parsed.possibleContentsCollection).toBe("Bone-Chilling Bonanza Collection");
+    expect(parsed.possibleContentsItems).toEqual(["Bare Bear Bones", "Demonic Dome", "Power Spike"]);
   });
 });

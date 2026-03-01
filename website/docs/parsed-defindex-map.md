@@ -102,6 +102,31 @@ This page lists currently implemented defindex parsing and where each value ends
 | Defindex | Output Field(s) | Notes |
 | --- | --- | --- |
 | `187` | `crate.series` | Primary direct crate series source |
+| _(metadata-derived)_ | `crate.possibleUnusualHints[]` | Hints extracted from case description text |
+| _(metadata-derived)_ | `crate.possibleContentsCollection` | Collection name inferred from description text |
+| _(metadata-derived)_ | `crate.possibleContentsItems[]` | Candidate item names parsed from collection list lines |
+
+### Community metadata signals used for crate/case parsing
+
+| Metadata Source | Pattern / Example | Used For |
+| --- | --- | --- |
+| Description line text | `Series #124` | `crate.series` fallback when defindex-based series is missing |
+| Type tag (`category=Type`) | `Crate`, `Cosmetic Case` | `crate.type`, `flags.isCrate`, `flags.isCommunityCrate` |
+| Item type/name/hash text | `Summer 2024 Cosmetic Case` | Crate/case detection fallback |
+
+### Possible unusual hints found in case descriptions
+
+| Description Pattern | Example | Note |
+| --- | --- | --- |
+| `Contents may be ... Unusual with ... effect` | `... Unusual with a Halloween 2023 effect` | Treated as case-contents metadata, not the case item's own unusual effect |
+| `Unusual Effect: <effect>` | `Unusual Effect: Chromatic Blaze` | Common in case listings; should not mark the case itself as unusual |
+
+### Possible cosmetics and collection hints found in case descriptions
+
+| Description Pattern | Example | Note |
+| --- | --- | --- |
+| Collection name line | `Bone-Chilling Bonanza Collection` | Indicates collection/theme for possible drops |
+| Individual item lines after collection line | `Bare Bear Bones`, `Demonic Dome`, `Power Spike` | Represents possible cosmetic drops listed in metadata |
 
 ## Killstreak
 
