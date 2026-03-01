@@ -69,15 +69,21 @@ export function resolveQualityName(
   qualityId: number | null,
   schema: SchemaCatalog,
   communityMetadata: CommunityItemMetadata | null,
+  options?: {
+    isWarPaint?: boolean;
+  },
 ): string | null {
   const fromCommunity = readQualityNameFromCommunity(communityMetadata);
+  const fromSchema = qualityId === null ? null : (schema.qualityNameById[qualityId] ?? null);
+
+  if (options?.isWarPaint && fromCommunity?.trim().toLowerCase() === "decorated weapon") {
+    return fromSchema ?? "Decorated";
+  }
+
   if (fromCommunity) {
     return fromCommunity;
   }
-  if (qualityId === null) {
-    return null;
-  }
-  return schema.qualityNameById[qualityId] ?? null;
+  return fromSchema;
 }
 
 export function resolveQualityGrade(communityMetadata: CommunityItemMetadata | null): string | null {

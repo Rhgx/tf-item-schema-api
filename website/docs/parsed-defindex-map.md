@@ -53,6 +53,11 @@ Also used:
 - `1009` -> `spells.deathGhosts`
 - `2016..2020` -> `spells.spellbookPages`
 
+Notes:
+
+- Spell lookup tokens such as `#TF_HalloweenSpell_Paint_2_Attr` are mapped to friendly labels
+  (for example `Die Job`) using TF2 localization keys.
+
 ## Strange Restrictions
 
 - `468` -> `strangeRestrictions.selector`

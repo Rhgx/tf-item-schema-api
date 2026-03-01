@@ -154,24 +154,11 @@ function resolveAttributeLookupValue(args: {
     return { lookupTable, decodedValue: null };
   }
 
-  let matchedValue: string | null = null;
-  let matchedTable: string | null = null;
-  for (const [tableName, entries] of Object.entries(args.schema.stringLookupsByTable)) {
-    const candidate = entries[roundedValue];
-    if (!candidate) {
-      continue;
-    }
-    if (matchedValue && candidate !== matchedValue) {
-      return { lookupTable: null, decodedValue: null };
-    }
-    matchedValue = candidate;
-    matchedTable = tableName;
-  }
-
-  return {
-    lookupTable: matchedTable ?? lookupTable,
-    decodedValue: matchedValue,
-  };
+  // Do not do a global "scan every lookup table by rounded value" fallback.
+  // It causes false positives (for example war paint texture wear values like 0/0.2
+  // getting decoded as unrelated spell strings). Only decode when attribute metadata
+  // explicitly points to a lookup table or special description-format handlers above.
+  return { lookupTable, decodedValue: null };
 }
 
 function resolveSpecialLookupValue(
@@ -288,6 +275,33 @@ function resolveItemKind(args: {
   return "misc";
 }
 
+function isWarPaintItem(args: {
+  schemaItem: SchemaCatalog["itemByDefindex"][number] | undefined;
+  communityMetadata: CommunityItemMetadata | null;
+  localizedName: string;
+}): boolean {
+  const toolType = typeof args.schemaItem?.tool?.type === "string" ? args.schemaItem.tool.type.toLowerCase() : "";
+  if (toolType.includes("paintkit")) {
+    return true;
+  }
+
+  const typeTag = args.communityMetadata?.tags.find((tag) => tag.category.toLowerCase() === "type");
+  if (typeTag && /war paint/i.test(typeTag.localizedTagName)) {
+    return true;
+  }
+
+  const text = [
+    args.localizedName,
+    args.communityMetadata?.type ?? "",
+    args.communityMetadata?.name ?? "",
+    args.communityMetadata?.marketHashName ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return text.includes("war paint");
+}
+
 function readKillstreakAttribute(
   attributes: NormalizedAttribute[],
   expectedName: string,
@@ -382,7 +396,13 @@ function normalizeInventoryItem(
   const strangeRanks = resolveStrangeRankMetadata(counters, primaryCounter, schema.strangeRankSets ?? []);
 
   const qualityId = rawItem.quality === undefined ? null : Number(rawItem.quality);
-  const qualityName = resolveQualityName(qualityId, schema, communityMetadata);
+  const qualityName = resolveQualityName(qualityId, schema, communityMetadata, {
+    isWarPaint: isWarPaintItem({
+      schemaItem,
+      communityMetadata,
+      localizedName,
+    }),
+  });
   const customName = resolveCustomName(rawItem, attributes);
   const killstreak = resolveKillstreakData(attributes);
   const paintkitId = resolvePaintkitId(attributes);

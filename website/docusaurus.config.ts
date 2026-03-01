@@ -5,7 +5,6 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'TF Item Schema API',
   tagline: 'TF2 inventory metadata API and TypeScript SDK',
-  favicon: 'img/favicon.ico',
 
   future: {
     v4: true,

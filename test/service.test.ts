@@ -289,6 +289,85 @@ describe("InventoryService", () => {
     expect(response.items[0]?.quality.grade).toBe("Mercenary Grade");
   });
 
+  test("uses schema decorated quality name for unused war paints", async () => {
+    const service = new InventoryService({
+      steamApiClient: {
+        async getPlayerItems() {
+          return {
+            status: 1,
+            numBackpackSlots: 3000,
+            items: [{ id: "wp1", defindex: 16391, quality: 15, attributes: [] }],
+          };
+        },
+        async resolveVanityUrl() {
+          return "76561198012345678";
+        },
+      },
+      schemaCache: {
+        async getCatalog() {
+          return {
+            ...schema,
+            itemByDefindex: {
+              ...schema.itemByDefindex,
+              16391: {
+                defindex: 16391,
+                displayName: "War Paint",
+                itemClass: "tool",
+                craftClass: null,
+                itemSlot: null,
+                imageUrl: null,
+                imageUrlLarge: null,
+                usedByClasses: [],
+                perClassLoadoutSlots: {},
+                styles: [],
+                tool: { type: "paintkit" },
+                capabilities: [],
+              },
+            },
+            qualityNameById: {
+              ...schema.qualityNameById,
+              15: "Decorated",
+            },
+          };
+        },
+      },
+      communityInventoryClient: {
+        async getItemMetadataByAssetId() {
+          return new Map<string, CommunityItemMetadata>([
+            [
+              "wp1",
+              {
+                assetId: "wp1",
+                name: "Smissmas Sweater War Paint",
+                marketHashName: "Smissmas Sweater War Paint (Factory New)",
+                type: "Commando Grade War Paint",
+                iconUrl: null,
+                iconUrlLarge: null,
+                tags: [
+                  { category: "Quality", localizedTagName: "Decorated Weapon", color: null },
+                  { category: "Type", localizedTagName: "War Paint", color: null },
+                  { category: "Rarity", localizedTagName: "Commando", color: null },
+                ],
+                descriptions: [],
+              },
+            ],
+          ]);
+        },
+      },
+    });
+
+    const response = await service.getInventory({
+      target: "gaben",
+      apiKey: "key",
+      language: "en",
+      apiKeySource: "sdk",
+    });
+
+    expect(response.items[0]?.quality.id).toBe(15);
+    expect(response.items[0]?.quality.name).toBe("Decorated");
+    expect(response.items[0]?.quality.grade).toBe("Commando Grade");
+  });
+
   test("parses trade/crafting/tool/paint/spells/strange-restriction metadata", async () => {
     const service = new InventoryService({
       steamApiClient: {
@@ -422,13 +501,16 @@ describe("InventoryService", () => {
     expect(item?.tool.unusualifierTemplate).toBe("SomeTemplateName");
     expect(item?.paint.rgbPrimary).toBe("#729E42");
     expect(item?.paint.rgbSecondary).toBe("#2F4F4F");
-    expect(item?.paint.primaryName).toBe("Muskelmannbraun");
-    expect(item?.paint.secondaryName).toBe("An Extraordinary Abundance of Tinge");
+    expect(item?.paint.primaryName).toBe("Indubitably Green");
+    expect(item?.paint.secondaryName).toBe("A Color Similar to Slate");
     expect(item?.paint.styleOverride).toBe(2);
-    expect(item?.spells.paint).toBe("#TF_HalloweenSpell_Paint_1_Attr");
-    expect(item?.spells.footsteps).toBe("#TF_HalloweenSpell_Footprints_8421376_Attr");
+    expect(item?.spells.paint).toBe("Putrescent Pigmentation");
+    expect(item?.spells.footsteps).toBe("Gangreen Footprints");
     expect(item?.spells.voices).toBe(true);
     expect(item?.spells.spellbookPages).toContain("Spellbook Page 2016");
+    const textureWearAttr = item?.attributes.find((entry) => entry.defindex === 725);
+    expect(textureWearAttr?.lookupTable).toBeNull();
+    expect(textureWearAttr?.decodedValue).toBeNull();
     expect(item?.strangeRestrictions.selector).toBe(1);
     expect(item?.strangeRestrictions.newCounterId).toBe(61);
     expect(item?.strangeRestrictions.entries).toEqual([
