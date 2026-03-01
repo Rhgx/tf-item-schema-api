@@ -7,6 +7,7 @@ const PARTICLE_ATTRIBUTE_NAMES = [
   "set_attached_particle",
   "unusual effect",
 ];
+const CRATE_CASE_RE = /\b(crate|case)\b/i;
 
 function stripHtml(input: string): string {
   return input.replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
@@ -74,6 +75,20 @@ function parseTagEffect(metadata: CommunityItemMetadata | null): string | null {
   return null;
 }
 
+function isLikelyCrateOrCase(metadata: CommunityItemMetadata | null): boolean {
+  if (!metadata) {
+    return false;
+  }
+
+  const typeTag = metadata.tags.find((tag) => tag.category.toLowerCase() === "type")?.localizedTagName ?? "";
+  if (CRATE_CASE_RE.test(typeTag)) {
+    return true;
+  }
+
+  const candidates = [metadata.type, metadata.name, metadata.marketHashName];
+  return candidates.some((candidate) => (candidate ? CRATE_CASE_RE.test(candidate) : false));
+}
+
 function findEffectIdByName(name: string, particleEffectNameById: Record<number, string>): number | null {
   const target = normalizeName(name);
   for (const [key, value] of Object.entries(particleEffectNameById)) {
@@ -104,6 +119,18 @@ export function resolveUnusualData(
       unusualEffectId: effectIdFromAttribute,
       unusualEffectName: schema.particleEffectNameById[effectIdFromAttribute] ?? `Effect #${effectIdFromAttribute}`,
       unusualSource: "attribute",
+    };
+  }
+
+  // Cases and crates often include "possible unusual effects" in descriptions.
+  // Those lines are not properties of the case item itself and must not mark
+  // the case as unusual.
+  if (isLikelyCrateOrCase(communityMetadata)) {
+    return {
+      isUnusual: false,
+      unusualEffectId: null,
+      unusualEffectName: null,
+      unusualSource: null,
     };
   }
 

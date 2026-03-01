@@ -4,124 +4,150 @@ sidebar_position: 5
 
 # Parsed Defindex Map
 
-This is the currently implemented attribute defindex parsing and normalized output mapping.
+This page lists currently implemented defindex parsing and where each value ends up in normalized output.
 
 ## Trade
 
-- `153` -> `trade.cannotTrade`
-- `195` -> `trade.alwaysTradable` and `trade.cannotTrade` logic
-- `2028` -> `trade.isMarketable`
-- `211` -> `trade.tradableAfter`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `153` | `trade.cannotTrade` | Explicit non-tradable flag in attributes |
+| `195` | `trade.alwaysTradable`, `trade.cannotTrade` logic | Overrides normal trade lock behavior |
+| `2028` | `trade.isMarketable` | Steam Community Market compatibility |
+| `211` | `trade.tradableAfter` | Unix timestamp (seconds) |
 
 ## Crafting
 
-- `449` -> `crafting.neverCraftable`
-- `785` -> `crafting.cannotGiftWrap`
-- `786` -> `crafting.toolNeedsGiftWrap`
-
-Also used:
-
-- raw `flag_cannot_craft`
-- "cannot craft" attribute-name matching -> `crafting.cannotCraft`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `449` | `crafting.neverCraftable` | Permanent crafting restriction |
+| `785` | `crafting.cannotGiftWrap` | Item cannot be wrapped |
+| `786` | `crafting.toolNeedsGiftWrap` | Tool requires wrapped target |
 
 ## Tool Metadata
 
-- `2012` -> `tool.targetDefindex`, `tool.targetItemName`
-- `2000..2008` -> `tool.recipeComponents`
-- `805` -> `tool.unusualifierTemplate`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `2012` | `tool.targetDefindex`, `tool.targetItemName` | Resolves target defindex using schema item map |
+| `2000..2008` | `tool.recipeComponents` | Craft recipe component defindexes |
+| `805` | `tool.unusualifierTemplate` | Stored as template string value |
 
-## Paint / Texture
+## Paint and Texture
 
-- `142` -> `paint.rgbPrimary`
-- `261` -> `paint.rgbSecondary`
-- `142/261` color values are also mapped to:
-  - `paint.primaryName`
-  - `paint.secondaryName`
-- `542` -> `paint.styleOverride`
-- `725` -> `paint.textureWear`
-- `749` -> `paint.textureWearDefault`
-- `866` -> `paint.seedLow`
-- `867` -> `paint.seedHigh`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `142` | `paint.rgbPrimary`, `paint.primaryName` | Numeric color converted to hex + known paint name |
+| `261` | `paint.rgbSecondary`, `paint.secondaryName` | Secondary color conversion and lookup |
+| `542` | `paint.styleOverride` | Integer style index |
+| `725` | `paint.textureWear` | Float-like wear value for war paints/skins |
+| `749` | `paint.textureWearDefault` | Default wear seed value |
+| `866` | `paint.seedLow` | Low/random seed component |
+| `867` | `paint.seedHigh` | High/random seed component |
 
 ## Spells
 
-- `1004` -> `spells.paint`
-- `1005` -> `spells.footsteps`
-- `1006` -> `spells.voices`
-- `1007` -> `spells.pumpkinBombs`
-- `1008` -> `spells.greenFlames`
-- `1009` -> `spells.deathGhosts`
-- `2016..2020` -> `spells.spellbookPages`
+### Spell defindexes
 
-Notes:
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `1004` | `spells.paint` | Decoded from token table |
+| `1005` | `spells.footsteps` | Decoded from token table (includes color variants) |
+| `1006` | `spells.voices` | Boolean toggle |
+| `1007` | `spells.pumpkinBombs` | Boolean toggle |
+| `1008` | `spells.greenFlames` | Boolean toggle |
+| `1009` | `spells.deathGhosts` | Boolean toggle |
+| `2016..2020` | `spells.spellbookPages` | Collected when value > 0 |
 
-- Spell lookup tokens such as `#TF_HalloweenSpell_Paint_2_Attr` are mapped to friendly labels
-  (for example `Die Job`) using TF2 localization keys.
+### Known paint spell variants (`1004`)
+
+| Token | Decoded Name |
+| --- | --- |
+| `TF_HalloweenSpell_Paint_1_Attr` | Putrescent Pigmentation |
+| `TF_HalloweenSpell_Paint_2_Attr` | Die Job |
+| `TF_HalloweenSpell_Paint_3_Attr` | Chromatic Corruption |
+| `TF_HalloweenSpell_Paint_4_Attr` | Spectral Spectrum |
+| `TF_HalloweenSpell_Paint_5_Attr` | Sinister Staining |
+
+### Known footsteps spell variants (`1005`)
+
+| Token | Decoded Name | Variant |
+| --- | --- | --- |
+| `TF_HalloweenSpell_Footprints_1_Attr` | Team Spirit Footprints | Team color pair |
+| `TF_HalloweenSpell_Footprints_2_Attr` | Headless Horseshoes | Base variant |
+| `TF_HalloweenSpell_Footprints_8421376_Attr` | Gangreen Footprints | Green variant |
+| `TF_HalloweenSpell_Footprints_3100495_Attr` | Corpse Gray Footprints | Gray variant |
+| `TF_HalloweenSpell_Footprints_5322826_Attr` | Violent Violet Footprints | Violet variant |
+| `TF_HalloweenSpell_Footprints_13595446_Attr` | Rotten Orange Footprints | Orange variant |
+| `TF_HalloweenSpell_Footprints_8208497_Attr` | Bruised Purple Footprints | Purple variant |
+
+### Spell token behavior
+
+- Token values with leading `#` are normalized (the `#` is removed before lookup).
+- If a token is unknown, the original token string is returned as-is in output.
 
 ## Strange Restrictions
 
-- `468` -> `strangeRestrictions.selector`
-- `385` -> `strangeRestrictions.newCounterId`
-- `454/455` -> `strangeRestrictions.entries[]` item slot 1 type/value
-- `456/457` -> `strangeRestrictions.entries[]` item slot 2 type/value
-- `496/497` -> `strangeRestrictions.entries[]` item slot 3 type/value
-- `458/459` -> `strangeRestrictions.entries[]` user slot 1 type/value
-- `460/461` -> `strangeRestrictions.entries[]` user slot 2 type/value
-- `462/463` -> `strangeRestrictions.entries[]` user slot 3 type/value
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `468` | `strangeRestrictions.selector` | Restriction mode selector |
+| `385` | `strangeRestrictions.newCounterId` | Counter type assigned by strangeifier/parts logic |
+| `454/455` | `strangeRestrictions.entries[]` item slot 1 type/value | Paired as `{scope:item, slot:1}` |
+| `456/457` | `strangeRestrictions.entries[]` item slot 2 type/value | Paired as `{scope:item, slot:2}` |
+| `496/497` | `strangeRestrictions.entries[]` item slot 3 type/value | Paired as `{scope:item, slot:3}` |
+| `458/459` | `strangeRestrictions.entries[]` user slot 1 type/value | Paired as `{scope:user, slot:1}` |
+| `460/461` | `strangeRestrictions.entries[]` user slot 2 type/value | Paired as `{scope:user, slot:2}` |
+| `462/463` | `strangeRestrictions.entries[]` user slot 3 type/value | Paired as `{scope:user, slot:3}` |
 
 ## Crates and Cases
 
-- `187` -> `crate.series`
-
-Also used:
-
-- attribute-name fallback containing "crate series"
-- community description/type/name/market hash parsing
-- output fields: `crate.series`, `crate.type`, `flags.isCrate`, `flags.isCommunityCrate`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `187` | `crate.series` | Primary direct crate series source |
 
 ## Killstreak
 
-- `2013` -> `killstreak.effectId`, `killstreak.effectName`, `killstreak.effectLookupTable`
-- `2014` -> `killstreak.sheenId`, `killstreak.sheenName`, `killstreak.sheenLookupTable`
-
-Also used:
-
-- attribute-name matching for `killstreak tier` -> `killstreak.tier`, `killstreak.tierName`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `2013` | `killstreak.effectId`, `killstreak.effectName`, `killstreak.effectLookupTable` | Supports schema lookup + description-format fallback |
+| `2014` | `killstreak.sheenId`, `killstreak.sheenName`, `killstreak.sheenLookupTable` | Supports schema lookup + description-format fallback |
 
 ## Unusual Effects
 
-- `134` -> `unusual.effectId`, `unusual.effectName`, `unusual.source`
-
-Also used:
-
-- particle-like attribute name/class matching
-- community descriptions/tags fallback parsing
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `134` | `unusual.effectId`, `unusual.effectName`, `unusual.source` | Primary unusual particle source before community fallbacks |
 
 ## Name and Cosmetic Helpers
 
-- `500` -> `names.custom`, `names.display`
-- `143` -> `attributes[].decodedValue` hire date decode (`YYYY-MM-DDTHH:mm:ss`) for `"custom employee number"`
+| Defindex | Output Field(s) | Notes |
+| --- | --- | --- |
+| `500` | `names.custom`, `names.display` | Custom item naming |
+| `143` | `attributes[].decodedValue` | Hire date-time decode (`YYYY-MM-DDTHH:mm:ss`) for `"custom employee number"` |
 
-Also used:
+## Fallback and Derived Parsing
 
-- `paintkit_proto_def_index` attribute-name matching -> `cosmetics.paintkitId`
-- `is_festivized` attribute-name matching -> `flags.isFestivized`
+These are not direct single-defindex mappings, but they affect output:
 
-## Quality Grade (Community Metadata)
+- **Crafting**
+  - raw `flag_cannot_craft` -> `crafting.cannotCraft`
+  - attribute-name contains `"cannot craft"` -> `crafting.cannotCraft`
+- **Crates/Cases**
+  - attribute-name contains `"crate series"`
+  - community description/type/name/market hash parsing
+  - outputs: `crate.series`, `crate.type`, `flags.isCrate`, `flags.isCommunityCrate`
+- **Killstreak tier**
+  - attribute-name matching `"killstreak tier"` -> `killstreak.tier`, `killstreak.tierName`
+- **Unusual fallback**
+  - particle-like attribute name/class matching
+  - community descriptions/tags fallback parsing
+- **Cosmetic helpers**
+  - `paintkit_proto_def_index` name matching -> `cosmetics.paintkitId`
+  - `is_festivized` name matching -> `flags.isFestivized`
+- **Quality grade**
+  - parsed from community metadata (`tags`, `type`, descriptions) -> `quality.grade`
 
-Decorated weapon grade is not parsed from name prefixes. It is parsed from community metadata:
-
-- tags (for example `Rarity`)
-- item `type`
-- description lines
-
-Output field:
-
-- `quality.grade`
-
-## Attribute Normalization Notes
+## Normalization Notes
 
 - Integer-coerced counter defindexes: `214`, `294`, `379`, `381`, `383`, `494`
-- Schema `string_lookups` decoding is exposed via:
+- Schema `string_lookups` decoding is exposed as:
   - `attributes[].lookupTable`
   - `attributes[].decodedValue`
